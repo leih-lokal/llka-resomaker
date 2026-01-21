@@ -2,6 +2,8 @@
 
 Self-service reservation system for lending libraries. Allows customers to browse items, add them to a cart, and create pickup reservations.
 
+![](sshot.png)
+
 ## Requirements
 
 This app requires [leih-lokal/leihbackend](https://github.com/leih-lokal/leihbackend) as the PocketBase backend.
