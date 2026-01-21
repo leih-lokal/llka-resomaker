@@ -1,4 +1,4 @@
-# leih.lokal Reservierung
+# leih.lokal Resomaker (LLKA-R)
 
 Self-service reservation system for lending libraries. Allows customers to browse items, add them to a cart, and create pickup reservations.
 
