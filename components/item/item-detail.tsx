@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Item, STATUS_LABELS, isAvailable } from "@/lib/types/item";
 import { getImageUrl } from "@/lib/api/client";
 import { useCart } from "@/context/cart-context";
+import { useConfig } from "@/context/config-context";
 
 interface ItemDetailProps {
   item: Item;
@@ -20,6 +21,7 @@ function stripHtml(html: string): string {
 }
 
 export function ItemDetail({ item }: ItemDetailProps) {
+  const config = useConfig();
   const { addItem, removeItem, isInCart } = useCart();
   const inCart = isInCart(item.id);
   const available = isAvailable(item.status);
@@ -92,9 +94,11 @@ export function ItemDetail({ item }: ItemDetailProps) {
               Kein Bild vorhanden
             </div>
           )}
-          <Badge className="absolute top-4 left-4 text-xl font-bold px-4 py-2">
-            #{item.iid}
-          </Badge>
+          {config.features.itemIds && (
+            <Badge className="absolute top-4 left-4 text-xl font-bold px-4 py-2">
+              #{item.iid}
+            </Badge>
+          )}
           {!available && (
             <Badge
               variant="destructive"
@@ -160,7 +164,7 @@ export function ItemDetail({ item }: ItemDetailProps) {
               <p className="font-medium">{item.model}</p>
             </div>
           )}
-          {item.copies > 0 && (
+          {config.features.copies && item.copies > 0 && (
             <div>
               <p className="text-sm text-muted-foreground">Verfügbare Exemplare</p>
               <p className="font-medium">{item.copies}</p>
@@ -177,10 +181,10 @@ export function ItemDetail({ item }: ItemDetailProps) {
         <Separator />
 
         <div className="flex items-center justify-between gap-4">
-          {item.deposit > 0 && (
+          {config.features.deposit && item.deposit > 0 && (
             <div>
               <p className="text-sm text-muted-foreground">Kaution</p>
-              <p className="text-3xl font-bold">{item.deposit}&euro;</p>
+              <p className="text-3xl font-bold">{item.deposit}{config.display.currency}</p>
             </div>
           )}
 

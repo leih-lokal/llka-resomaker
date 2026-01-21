@@ -1,14 +1,16 @@
+import { config } from "@/lib/config";
+
 export interface OpeningHours {
   open: number;
   close: number;
 }
 
-export const OPENING_HOURS: Record<number, OpeningHours> = {
-  1: { open: 15, close: 19 }, // Monday
-  4: { open: 15, close: 19 }, // Thursday
-  5: { open: 15, close: 19 }, // Friday
-  6: { open: 10, close: 14 }, // Saturday
-};
+// Use config hours, filtering out null values
+export const OPENING_HOURS: Record<number, OpeningHours> = Object.fromEntries(
+  Object.entries(config.hours)
+    .filter(([, hours]) => hours !== null)
+    .map(([day, hours]) => [Number(day), hours as OpeningHours])
+);
 
 export const DAY_NAMES: Record<number, string> = {
   0: "Sonntag",

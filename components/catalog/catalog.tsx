@@ -10,21 +10,27 @@ import { Item } from "@/lib/types/item";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const ITEMS_PER_PAGE = 24;
+import { useConfig } from "@/context/config-context";
 
 interface CatalogProps {
   initialItems?: Item[];
 }
 
 export function Catalog({ initialItems }: CatalogProps) {
+  const config = useConfig();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Initialize state from URL params
-  const initialSearch = searchParams.get("q") || "";
-  const initialPage = parseInt(searchParams.get("page") || "1", 10);
-  const initialAvailable = searchParams.get("all") !== "1";
+  // Initialize state from URL params (if URL params feature is enabled)
+  const initialSearch = config.features.urlParams
+    ? searchParams.get("q") || ""
+    : "";
+  const initialPage = config.features.urlParams
+    ? parseInt(searchParams.get("page") || "1", 10)
+    : 1;
+  const initialAvailable = config.features.urlParams
+    ? searchParams.get("all") !== "1"
+    : config.defaults.availableOnly;
 
   const [items, setItems] = useState<Item[]>(initialItems || []);
   const [search, setSearch] = useState(initialSearch);
@@ -35,9 +41,11 @@ export function Catalog({ initialItems }: CatalogProps) {
   const [isLoading, setIsLoading] = useState(!initialItems);
   const [error, setError] = useState<string | null>(null);
 
-  // Update URL params
+  // Update URL params (only if feature is enabled)
   const updateUrl = useCallback(
     (newSearch: string, newPage: number, newAvailableOnly: boolean) => {
+      if (!config.features.urlParams) return;
+
       const params = new URLSearchParams();
       if (newSearch) params.set("q", newSearch);
       if (newPage > 1) params.set("page", newPage.toString());
@@ -57,7 +65,7 @@ export function Catalog({ initialItems }: CatalogProps) {
       try {
         const response = await getItems(
           pageNum,
-          ITEMS_PER_PAGE,
+          config.limits.itemsPerPage,
           searchTerm || undefined,
           showAvailableOnly
         );
@@ -108,12 +116,16 @@ export function Catalog({ initialItems }: CatalogProps) {
     setAvailableOnly((prev) => !prev);
   };
 
+  const showControls = config.features.search || config.features.availabilityToggle;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">
-            {availableOnly ? "Verfügbare Gegenstände" : "Alle Gegenstände"}
+            {config.features.availabilityToggle
+              ? (availableOnly ? "Verfügbare Gegenstände" : "Alle Gegenstände")
+              : "Gegenstände"}
           </h1>
           <p className="text-muted-foreground">
             {totalItems > 0
@@ -121,30 +133,36 @@ export function Catalog({ initialItems }: CatalogProps) {
               : "Wählen Sie Gegenstände aus und reservieren Sie sie zur Abholung."}
           </p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <div className="flex-1 sm:w-72">
-            <SearchBar
-              value={search}
-              onChange={setSearch}
-              placeholder="Gegenstand suchen..."
-            />
-          </div>
-          <Button
-            variant={availableOnly ? "outline" : "secondary"}
-            size="icon"
-            onClick={toggleAvailableOnly}
-            title={availableOnly ? "Alle anzeigen" : "Nur verfügbare anzeigen"}
-          >
-            {availableOnly ? (
-              <Eye className="h-4 w-4" />
-            ) : (
-              <EyeOff className="h-4 w-4" />
+        {showControls && (
+          <div className="flex gap-2 w-full sm:w-auto">
+            {config.features.search && (
+              <div className="flex-1 sm:w-72">
+                <SearchBar
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Gegenstand suchen..."
+                />
+              </div>
             )}
-          </Button>
-        </div>
+            {config.features.availabilityToggle && (
+              <Button
+                variant={availableOnly ? "outline" : "secondary"}
+                size="icon"
+                onClick={toggleAvailableOnly}
+                title={availableOnly ? "Alle anzeigen" : "Nur verfügbare anzeigen"}
+              >
+                {availableOnly ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
-      {!availableOnly && (
+      {config.features.availabilityToggle && !availableOnly && (
         <p className="text-sm text-muted-foreground">
           Es werden auch nicht verfügbare Gegenstände angezeigt.
         </p>
@@ -166,7 +184,7 @@ export function Catalog({ initialItems }: CatalogProps) {
         </Alert>
       )}
 
-      {isLoading ? <ItemGridSkeleton count={ITEMS_PER_PAGE} /> : <ItemGrid items={items} />}
+      {isLoading ? <ItemGridSkeleton count={config.limits.itemsPerPage} /> : <ItemGrid items={items} />}
 
       {!isLoading && totalPages > 1 && (
         <Pagination

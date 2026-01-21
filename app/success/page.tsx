@@ -21,6 +21,7 @@ import {
   generateOutlookUrl,
   downloadICSFile,
 } from "@/lib/utils/calendar";
+import { useConfig } from "@/context/config-context";
 
 interface ReservationInfo {
   id: string;
@@ -30,6 +31,7 @@ interface ReservationInfo {
 }
 
 export default function SuccessPage() {
+  const config = useConfig();
   const router = useRouter();
   const [reservation, setReservation] = useState<ReservationInfo | null>(null);
 
@@ -62,11 +64,11 @@ export default function SuccessPage() {
   const formattedTime = format(pickupDate, "HH:mm", { locale: de });
 
   const calendarEvent = {
-    title: "Abholung bei leih.lokal",
+    title: `Abholung bei ${config.brand.name}`,
     description: `Reservierte Gegenstände:\n${reservation.items
       .map((item) => `- #${item.iid} ${item.name}`)
       .join("\n")}`,
-    location: "leih.lokal", // Could be configured
+    location: config.brand.name,
     startDate: pickupDate,
     endDate: pickupEndDate,
   };
@@ -131,41 +133,43 @@ export default function SuccessPage() {
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground text-center">
-          Zum Kalender hinzufügen
-        </p>
-        <div className="grid grid-cols-3 gap-3">
-          <Button
-            variant="outline"
-            className="flex-col h-auto py-3"
-            onClick={() =>
-              window.open(generateGoogleCalendarUrl(calendarEvent), "_blank")
-            }
-          >
-            <Calendar className="h-5 w-5 mb-1" />
-            <span className="text-xs">Google</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-col h-auto py-3"
-            onClick={handleAddToAppleCalendar}
-          >
-            <Calendar className="h-5 w-5 mb-1" />
-            <span className="text-xs">Apple</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-col h-auto py-3"
-            onClick={() =>
-              window.open(generateOutlookUrl(calendarEvent), "_blank")
-            }
-          >
-            <Calendar className="h-5 w-5 mb-1" />
-            <span className="text-xs">Outlook</span>
-          </Button>
+      {config.features.calendarButtons && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground text-center">
+            Zum Kalender hinzufügen
+          </p>
+          <div className="grid grid-cols-3 gap-3">
+            <Button
+              variant="outline"
+              className="flex-col h-auto py-3"
+              onClick={() =>
+                window.open(generateGoogleCalendarUrl(calendarEvent), "_blank")
+              }
+            >
+              <Calendar className="h-5 w-5 mb-1" />
+              <span className="text-xs">Google</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-col h-auto py-3"
+              onClick={handleAddToAppleCalendar}
+            >
+              <Calendar className="h-5 w-5 mb-1" />
+              <span className="text-xs">Apple</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-col h-auto py-3"
+              onClick={() =>
+                window.open(generateOutlookUrl(calendarEvent), "_blank")
+              }
+            >
+              <Calendar className="h-5 w-5 mb-1" />
+              <span className="text-xs">Outlook</span>
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-8 text-center">
         <Button asChild>

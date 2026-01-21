@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        # Required
+        NEXT_PUBLIC_API_BASE: http://localhost:8090
+
+        # Branding (optional)
+        # NEXT_PUBLIC_BRAND_NAME: leih.lokal
+        # NEXT_PUBLIC_BRAND_TAGLINE: Leihen statt kaufen
+        # NEXT_PUBLIC_BRAND_LOGO: ""
+        # NEXT_PUBLIC_BRAND_ACCENT: "#000000"
+
+        # Feature flags (optional)
+        # NEXT_PUBLIC_FEATURE_SEARCH: "true"
+        # NEXT_PUBLIC_FEATURE_AVAILABILITY_TOGGLE: "true"
+        # NEXT_PUBLIC_FEATURE_ITEM_IDS: "true"
+        # NEXT_PUBLIC_FEATURE_DETAIL_PAGES: "true"
+        # NEXT_PUBLIC_FEATURE_URL_PARAMS: "true"
+        # NEXT_PUBLIC_FEATURE_TIME_SELECTION: "true"
+        # NEXT_PUBLIC_FEATURE_DEPOSIT: "true"
+        # NEXT_PUBLIC_FEATURE_COPIES: "true"
+        # NEXT_PUBLIC_FEATURE_CALENDAR_BUTTONS: "true"
+
+        # Limits (optional)
+        # NEXT_PUBLIC_LIMIT_CART_ITEMS: "10"
+        # NEXT_PUBLIC_LIMIT_PICKUP_DAYS: "28"
+        # NEXT_PUBLIC_LIMIT_ITEMS_PER_PAGE: "24"
+
+        # Opening hours (optional)
+        # NEXT_PUBLIC_HOURS_JSON: '{"1":"15:00-19:00","4":"15:00-19:00","5":"15:00-19:00","6":"10:00-14:00"}'
+
+        # Display (optional)
+        # NEXT_PUBLIC_DISPLAY_CURRENCY: "€"
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

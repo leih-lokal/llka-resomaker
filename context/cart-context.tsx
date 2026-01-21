@@ -8,7 +8,9 @@ import {
   useCallback,
   ReactNode,
 } from "react";
+import { toast } from "sonner";
 import { Item } from "@/lib/types/item";
+import { useConfig } from "@/context/config-context";
 
 interface CartContextType {
   items: Item[];
@@ -25,6 +27,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const CART_STORAGE_KEY = "leihlokal-cart";
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const config = useConfig();
   const [items, setItems] = useState<Item[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -57,9 +60,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (prev.some((i) => i.id === item.id)) {
         return prev;
       }
+      // Check cart limit (0 = unlimited)
+      if (config.limits.cartItems > 0 && prev.length >= config.limits.cartItems) {
+        toast.error(`Maximal ${config.limits.cartItems} Gegenstände im Ausleihkorb erlaubt`);
+        return prev;
+      }
       return [...prev, item];
     });
-  }, []);
+  }, [config.limits.cartItems]);
 
   const removeItem = useCallback((itemId: string) => {
     setItems((prev) => prev.filter((item) => item.id !== itemId));

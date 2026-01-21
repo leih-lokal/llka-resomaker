@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { config } from "@/lib/config";
 
 interface CalendarEvent {
   title: string;
@@ -32,7 +33,7 @@ export function generateICSFile(event: CalendarEvent): string {
   const icsContent = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//leih.lokal//Reservation//DE",
+    `PRODID:-//${config.brand.name}//Reservation//DE`,
     "BEGIN:VEVENT",
     `DTSTART:${formatDateForICS(event.startDate)}`,
     `DTEND:${formatDateForICS(event.endDate)}`,

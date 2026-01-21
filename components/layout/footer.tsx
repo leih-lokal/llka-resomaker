@@ -1,4 +1,5 @@
 import { formatOpeningHours } from "@/lib/constants/opening-hours";
+import { config } from "@/lib/config";
 
 export function Footer() {
   const hours = formatOpeningHours();
@@ -8,9 +9,9 @@ export function Footer() {
       <div className="container py-8">
         <div className="grid gap-8 md:grid-cols-2">
           <div>
-            <h3 className="mb-4 text-lg font-semibold">leih.lokal</h3>
+            <h3 className="mb-4 text-lg font-semibold">{config.brand.name}</h3>
             <p className="text-sm text-muted-foreground">
-              Leihen statt kaufen - nachhaltig und gemeinschaftlich.
+              {config.brand.tagline}
             </p>
           </div>
 
@@ -36,7 +37,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} leih.lokal</p>
+          <p>&copy; {new Date().getFullYear()} {config.brand.name}</p>
         </div>
       </div>
     </footer>

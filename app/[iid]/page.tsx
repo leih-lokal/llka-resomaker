@@ -1,24 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, notFound } from "next/navigation";
+import { useParams, notFound, useRouter } from "next/navigation";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ItemDetail } from "@/components/item/item-detail";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getItemByIid } from "@/lib/api/items";
 import { Item } from "@/lib/types/item";
+import { useConfig } from "@/context/config-context";
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").trim();
 }
 
 export default function ItemPage() {
+  const config = useConfig();
+  const router = useRouter();
   const params = useParams();
   const iid = parseInt(params.iid as string, 10);
 
   const [item, setItem] = useState<Item | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFoundState, setNotFoundState] = useState(false);
+
+  // Redirect to home if detail pages are disabled
+  useEffect(() => {
+    if (!config.features.detailPages) {
+      router.replace("/");
+    }
+  }, [config.features.detailPages, router]);
 
   useEffect(() => {
     if (isNaN(iid)) {

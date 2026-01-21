@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
+import { ConfigProvider } from "@/context/config-context";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CartSheet } from "@/components/cart/cart-sheet";
 import { Toaster } from "@/components/ui/sonner";
+import { config } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,9 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "leih.lokal - Leihen statt kaufen",
-  description:
-    "Reservieren Sie Gegenstände bei leih.lokal - nachhaltig und gemeinschaftlich.",
+  title: config.meta.title,
+  description: config.meta.description,
 };
 
 export default function RootLayout({
@@ -32,14 +33,21 @@ export default function RootLayout({
     <html lang="de">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        style={{
+          "--brand-accent": config.brand.accent,
+          "--primary": config.brand.accent,
+          "--ring": config.brand.accent,
+        } as React.CSSProperties}
       >
-        <CartProvider>
-          <Header />
-          <main className="container flex-1 py-8">{children}</main>
-          <Footer />
-          <CartSheet />
-          <Toaster />
-        </CartProvider>
+        <ConfigProvider config={config}>
+          <CartProvider>
+            <Header />
+            <main className="container flex-1 py-8">{children}</main>
+            <Footer />
+            <CartSheet />
+            <Toaster />
+          </CartProvider>
+        </ConfigProvider>
       </body>
     </html>
   );

@@ -2,6 +2,16 @@ import { ApiError } from "@/lib/types/reservation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
 
+// Use proxy in browser to avoid CORS, direct on server
+const getProxyUrl = (endpoint: string) => {
+  if (typeof window === "undefined") {
+    // Server-side: call API directly
+    return `${API_BASE}${endpoint}`;
+  }
+  // Client-side: use proxy to avoid CORS
+  return `/api/proxy${endpoint}`;
+};
+
 export class ApiClientError extends Error {
   code: number;
   data?: ApiError["data"];
@@ -18,7 +28,7 @@ export async function fetchApi<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const url = `${API_BASE}${endpoint}`;
+  const url = getProxyUrl(endpoint);
 
   const response = await fetch(url, {
     ...options,
@@ -37,7 +47,7 @@ export async function fetchApi<T>(
 }
 
 export function getImageUrl(itemId: string, filename: string): string {
-  return `${API_BASE}/api/files/item/${itemId}/${filename}`;
+  return `${API_BASE}/api/files/item_public/${itemId}/${filename}`;
 }
 
 export function getThumbnailUrl(
@@ -45,5 +55,5 @@ export function getThumbnailUrl(
   filename: string,
   size: string = "100x100"
 ): string {
-  return `${API_BASE}/api/files/item/${itemId}/${filename}?thumb=${size}`;
+  return `${API_BASE}/api/files/item_public/${itemId}/${filename}?thumb=${size}`;
 }

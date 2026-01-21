@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Item } from "@/lib/types/item";
 import { getImageUrl } from "@/lib/api/client";
+import { useConfig } from "@/context/config-context";
 
 interface CartSummaryProps {
   items: Item[];
@@ -14,6 +15,7 @@ function stripHtml(html: string): string {
 }
 
 export function CartSummary({ items }: CartSummaryProps) {
+  const config = useConfig();
   const totalDeposit = items.reduce((sum, item) => sum + item.deposit, 0);
 
   return (
@@ -51,9 +53,9 @@ export function CartSummary({ items }: CartSummaryProps) {
                 <p className="text-sm font-medium truncate">{name}</p>
                 <p className="text-xs text-muted-foreground">#{item.iid}</p>
               </div>
-              {item.deposit > 0 && (
+              {config.features.deposit && item.deposit > 0 && (
                 <Badge variant="secondary" className="shrink-0">
-                  {item.deposit}&euro;
+                  {item.deposit}{config.display.currency}
                 </Badge>
               )}
             </div>
@@ -61,10 +63,10 @@ export function CartSummary({ items }: CartSummaryProps) {
         })}
       </div>
 
-      {totalDeposit > 0 && (
+      {config.features.deposit && totalDeposit > 0 && (
         <div className="border-t pt-3 flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Gesamtkaution</span>
-          <span className="text-lg font-bold">{totalDeposit}&euro;</span>
+          <span className="text-lg font-bold">{totalDeposit}{config.display.currency}</span>
         </div>
       )}
     </div>

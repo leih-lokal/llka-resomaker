@@ -16,6 +16,7 @@ import {
   getValidPickupSlots,
   formatPickupDateTime,
 } from "@/lib/constants/opening-hours";
+import { useConfig } from "@/context/config-context";
 
 interface PickupSelectorProps {
   value: string;
@@ -31,15 +32,18 @@ interface PickupSlot {
 }
 
 export function PickupSelector({ value, onChange, error }: PickupSelectorProps) {
+  const config = useConfig();
+  const weeksAhead = Math.ceil(config.limits.pickupDays / 7);
+
   const slots = useMemo(() => {
-    const rawSlots = getValidPickupSlots(4);
+    const rawSlots = getValidPickupSlots(weeksAhead);
     return rawSlots.map((date): PickupSlot => ({
       date,
       dateKey: format(date, "yyyy-MM-dd"),
       timeLabel: format(date, "HH:mm"),
       fullDateTime: formatPickupDateTime(date),
     }));
-  }, []);
+  }, [weeksAhead]);
 
   // Group slots by date
   const slotsByDate = useMemo(() => {
@@ -74,10 +78,15 @@ export function PickupSelector({ value, onChange, error }: PickupSelectorProps) 
     : [];
 
   const handleDateChange = (dateKey: string) => {
-    // Select the first available time for this date
     const timesForDate = slotsByDate.get(dateKey);
     if (timesForDate && timesForDate.length > 0) {
-      onChange(timesForDate[0].fullDateTime);
+      if (config.features.timeSelection) {
+        // Select the first available time for this date
+        onChange(timesForDate[0].fullDateTime);
+      } else {
+        // Auto-select the last time slot (closing - 1 hour)
+        onChange(timesForDate[timesForDate.length - 1].fullDateTime);
+      }
     }
   };
 
@@ -109,7 +118,7 @@ export function PickupSelector({ value, onChange, error }: PickupSelectorProps) 
         </Select>
       </div>
 
-      {selectedDateKey && (
+      {config.features.timeSelection && selectedDateKey && (
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             <Clock className="h-4 w-4" />

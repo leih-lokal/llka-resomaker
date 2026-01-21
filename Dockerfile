@@ -1,0 +1,66 @@
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Build arguments for configuration (baked in at build time)
+ARG NEXT_PUBLIC_API_BASE
+ARG NEXT_PUBLIC_BRAND_NAME
+ARG NEXT_PUBLIC_BRAND_TAGLINE
+ARG NEXT_PUBLIC_BRAND_LOGO
+ARG NEXT_PUBLIC_BRAND_ACCENT
+ARG NEXT_PUBLIC_META_TITLE
+ARG NEXT_PUBLIC_META_DESCRIPTION
+ARG NEXT_PUBLIC_HOURS_JSON
+ARG NEXT_PUBLIC_FEATURE_SEARCH
+ARG NEXT_PUBLIC_FEATURE_AVAILABILITY_TOGGLE
+ARG NEXT_PUBLIC_FEATURE_ITEM_IDS
+ARG NEXT_PUBLIC_FEATURE_DETAIL_PAGES
+ARG NEXT_PUBLIC_FEATURE_URL_PARAMS
+ARG NEXT_PUBLIC_FEATURE_TIME_SELECTION
+ARG NEXT_PUBLIC_FEATURE_DEPOSIT
+ARG NEXT_PUBLIC_FEATURE_COPIES
+ARG NEXT_PUBLIC_FEATURE_CALENDAR_BUTTONS
+ARG NEXT_PUBLIC_LIMIT_CART_ITEMS
+ARG NEXT_PUBLIC_LIMIT_PICKUP_DAYS
+ARG NEXT_PUBLIC_LIMIT_ITEMS_PER_PAGE
+ARG NEXT_PUBLIC_DEFAULT_AVAILABLE_ONLY
+ARG NEXT_PUBLIC_DEFAULT_SORT
+ARG NEXT_PUBLIC_DISPLAY_CURRENCY
+
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source
+COPY . .
+
+# Build the app (env vars are baked in here)
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy built assets
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]

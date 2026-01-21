@@ -1,5 +1,6 @@
 import { fetchApi } from "./client";
 import { Item, ItemsResponse } from "@/lib/types/item";
+import { config } from "@/lib/config";
 
 export async function getItems(
   page: number = 1,
@@ -25,18 +26,18 @@ export async function getItems(
 
   const params = new URLSearchParams({
     filter: filters.join(" && "),
-    sort: "name",
+    sort: config.defaults.sort,
     page: page.toString(),
     perPage: perPage.toString(),
   });
 
   return fetchApi<ItemsResponse>(
-    `/api/collections/item/records?${params.toString()}`
+    `/api/collections/item_public/records?${params.toString()}`
   );
 }
 
 export async function getItem(id: string): Promise<Item> {
-  return fetchApi<Item>(`/api/collections/item/records/${id}`);
+  return fetchApi<Item>(`/api/collections/item_public/records/${id}`);
 }
 
 export async function getItemByIid(iid: number): Promise<Item | null> {
@@ -46,7 +47,7 @@ export async function getItemByIid(iid: number): Promise<Item | null> {
   });
 
   const response = await fetchApi<ItemsResponse>(
-    `/api/collections/item/records?${params.toString()}`
+    `/api/collections/item_public/records?${params.toString()}`
   );
 
   return response.items.length > 0 ? response.items[0] : null;

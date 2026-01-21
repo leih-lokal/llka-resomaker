@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/cart-context";
 import { CartItem } from "./cart-item";
+import { useConfig } from "@/context/config-context";
 
 export function CartSheet() {
+  const config = useConfig();
   const { items, isOpen, setIsOpen, removeItem, clearCart } = useCart();
 
   const totalDeposit = items.reduce((sum, item) => sum + item.deposit, 0);
@@ -59,13 +61,13 @@ export function CartSheet() {
             </div>
 
             <div className="border-t bg-muted/30 p-6 space-y-4">
-              {totalDeposit > 0 && (
+              {config.features.deposit && totalDeposit > 0 && (
                 <>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">
                       Gesamtkaution
                     </span>
-                    <span className="text-2xl font-bold">{totalDeposit}&euro;</span>
+                    <span className="text-2xl font-bold">{totalDeposit}{config.display.currency}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Die Kaution wird bei Abholung fällig und bei Rückgabe erstattet.
